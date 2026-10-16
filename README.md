@@ -8,6 +8,14 @@ printf '  x  \n' | s.strip | s.center 5 '*'     # **x**
 cat names.txt | s.re_find '(\w+)@' | s.uniq
 ```
 
+## Why not sed / awk / tr?
+
+You already know what `s.replace`, `s.partition` or `s.slice -3` do, because they behave like the Python `str` methods they are named after. Arguments are literal unless the name says `re_`, so `s.replace '.' '/'` needs no escaping. Slices take negative indexes. Regexes use Python syntax rather than whichever of BRE, ERE or PCRE the local tool speaks.
+
+The cost is speed: functions without a coreutils equivalent start a Python process through `uv` on every call. That's fine at the prompt, but in a hot loop use `sed`/`awk`.
+
+## Usage
+
 Functions read stdin line by line. Pass `-w` / `--whole` as the first argument to operate on all of stdin as one string.
 
 ## Requirements

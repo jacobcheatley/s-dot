@@ -179,6 +179,11 @@ expect_eq "s.pascal snake_case"  "HelloWorld"         "$(echo 'hello_world' | s.
 expect_eq "s.pascal XMLParser"   "XmlParser"          "$(echo 'XMLParser' | s.pascal)"
 expect_eq "s.const camelCase"    "HELLO_WORLD"        "$(echo 'helloWorld' | s.const)"
 
+# --- Completion menu covers every function ---
+expect_eq "completion lists every s.* function" \
+    "$(print -l ${(ok)functions[(I)s.*]})" \
+    "$(grep -oE "'s\.[a-z_]+" "${plugin:h}/_s_funcs_dispatcher" | tr -d "'" | sort)"
+
 echo ""
 echo "passed: $passed  failed: $failed"
 exit $(( failed > 0 ? 1 : 0 ))
