@@ -1118,3 +1118,25 @@ s.const () {
     if [[ -t 0 ]]; then echo "Usage: ... | s.const" >&2; return 2; fi
     _s_py "$_s_caseconv_py" -- const
 }
+
+# --- Completion ---
+
+# Grouped, coloured `s.<TAB>` menu. Tags must match `_describe -t` in _s_funcs_dispatcher.
+fpath+=("${0:A:h}")
+autoload -Uz _s_funcs_dispatcher
+() {
+    local tag
+    local -A colours=(
+        s-case 51  s-case-style 213  s-trim-pad 220  s-pred 84  s-queries 75
+        s-substitution 196  s-decompose 141  s-transform 208  s-line 46
+    )
+    for tag in ${(k)colours}; do
+        zstyle ":completion:*:$tag" group-name ''
+        zstyle ":completion:*:$tag" format "%F{$colours[$tag]}-- %d --%f"
+    done
+
+    # Prepend to whatever completer chain is already configured.
+    local -a completers
+    zstyle -a ':completion:*' completer completers || completers=(_complete _ignored)
+    (( ${completers[(I)_s_funcs_dispatcher]} )) || zstyle ':completion:*' completer _s_funcs_dispatcher $completers
+}

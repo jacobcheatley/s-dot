@@ -1,0 +1,107 @@
+#autoload
+
+_s_funcs_dispatcher() {
+    (( CURRENT == 1 )) || return 1
+    [[ -z "$PREFIX" || "$PREFIX" == s.* ]] || return 1
+
+    local -a case_ case_style trim_pad pred_filter queries substitution decompose transform line_ops
+
+    case_=(
+        's.lower:lowercase each line'
+        's.upper:uppercase each line'
+        's.swapcase:swap case of each char'
+        's.capitalize:upper first char, lower rest (per line)'
+        's.title:title-case each word'
+    )
+    case_style=(
+        's.snake:to snake_case'
+        's.kebab:to kebab-case'
+        's.camel:to camelCase'
+        's.pascal:to PascalCase'
+        's.const:to CONST_CASE'
+    )
+    trim_pad=(
+        's.strip:strip leading/trailing chars (default whitespace)'
+        's.lstrip:strip leading chars'
+        's.rstrip:strip trailing chars'
+        's.removeprefix:strip exact prefix if present'
+        's.removesuffix:strip exact suffix if present'
+        's.ljust:pad right to width N'
+        's.rjust:pad left to width N'
+        's.center:pad both sides to width N'
+        's.zfill:zero-fill to width N (sign-aware)'
+    )
+    pred_filter=(
+        's.contains:filter lines containing SUB'
+        's.startswith:filter lines starting with PFX'
+        's.endswith:filter lines ending with SFX'
+        's.re_match:filter lines matching PATTERN'
+        's.isupper:filter lines that are all uppercase'
+        's.islower:filter lines that are all lowercase'
+        's.isdigit:filter lines that are all digits'
+        's.isalpha:filter lines that are all letters'
+        's.isalnum:filter lines that are letters or digits'
+        's.isspace:filter lines that are all whitespace'
+        's.isascii:filter lines that are pure ASCII'
+    )
+    queries=(
+        's.find:print index of first SUB, -1 if absent'
+        's.rfind:print index of last SUB, -1 if absent'
+        's.index:like find, exit 1 on miss'
+        's.rindex:like rfind, exit 1 on miss'
+        's.count:count non-overlapping occurrences of SUB'
+        's.len:print length per line'
+    )
+    substitution=(
+        's.replace:literal OLD->NEW substitution'
+        's.re_replace:regex re.sub PATTERN -> REPL'
+        's.translate:char-by-char map via maketrans(FROM, TO)'
+        's.expandtabs:replace tabs with N spaces (column-aware)'
+    )
+    decompose=(
+        's.split:split on SEP (default whitespace) -> one line each'
+        's.re_split:re.split on PATTERN -> one line per piece'
+        's.partition:split into head/sep/tail (3 lines)'
+        's.rpartition:partition on last occurrence'
+        's.slice:Python-style [start:end]'
+        's.chars:one character per line'
+        's.words:one word per line (whitespace-split)'
+        's.lines:pass-through (whole-mode: split text into lines)'
+        's.re_find:emit each regex match (or capture group) as a line'
+        's.join:concatenate lines with SEP'
+    )
+    transform=(
+        's.reverse:reverse each line'
+        's.repeat:repeat each line N times'
+        's.wrap:wrap text to width N'
+        's.truncate:cap line at N chars, append SUFFIX'
+        's.prefix:prepend STR to each line'
+        's.suffix:append STR to each line'
+        's.indent:indent each line by N copies of CHAR'
+        's.dedent:strip common leading whitespace'
+        's.format:apply Python TEMPLATE.format(line) per line'
+    )
+    line_ops=(
+        's.sort:sort lines (byte-wise, LC_ALL=C)'
+        's.rsort:reverse-sort lines'
+        's.uniq:dedup preserving first-seen order'
+        's.shuffle:random line order'
+        's.enumerate:prefix each line with its index'
+        's.head:first N lines'
+        's.tail:last N lines'
+    )
+
+    _describe -t s-case          'Case'                  case_
+    _describe -t s-case-style    'Case-style converters' case_style
+    _describe -t s-trim-pad      'Trim & pad'            trim_pad
+    _describe -t s-pred          'Predicate filters'     pred_filter
+    _describe -t s-queries       'Search queries'        queries
+    _describe -t s-substitution  'Substitution'          substitution
+    _describe -t s-decompose     'Decompose / recompose' decompose
+    _describe -t s-transform     'Per-line transform'    transform
+    _describe -t s-line          'Line stream ops'       line_ops
+
+    return 0
+}
+
+_s_funcs_dispatcher "$@"

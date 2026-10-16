@@ -24,6 +24,18 @@ echo 'source ~/s-dot/s-dot.plugin.zsh' >> ~/.zshrc
 
 The file is named `*.plugin.zsh`, so plugin managers (oh-my-zsh custom plugins, antidote, zinit) pick it up directly.
 
+## Tab completion
+
+Typing `s.<TAB>` at the start of a command shows every function with a one-line description, grouped by category with coloured headers. Sourcing the plugin sets this up: it adds the repo to `fpath`, autoloads `_s_funcs_dispatcher`, and prepends it to your `completer` zstyle (your existing chain is kept). Source the plugin after any line of your own that sets `completer`, or that line will drop it.
+
+Requires `compinit` to have run, which oh-my-zsh and most frameworks already do. For the nicest menu, add `zstyle ':completion:*' list-grouped yes`.
+
+## Tests
+
+```sh
+zsh test.zsh
+```
+
 ## Functions
 
 `s.lower`, `s.upper`, `s.swapcase`, `s.capitalize`, `s.title`, `s.strip`, `s.lstrip`, `s.rstrip`, `s.ljust`, `s.rjust`, `s.center`, `s.zfill`, `s.replace`, `s.contains`, `s.startswith`, `s.endswith`, `s.count`, `s.split`, `s.join`, `s.chars`, `s.words`, `s.lines`, `s.reverse`, `s.slice`, `s.len`, `s.repeat`, `s.sort`, `s.rsort`, `s.uniq`, `s.shuffle`, `s.enumerate`, `s.head`, `s.tail`, `s.find`, `s.rfind`, `s.index`, `s.rindex`, `s.partition`, `s.rpartition`, `s.removeprefix`, `s.removesuffix`, `s.expandtabs`, `s.translate`, `s.isupper`, `s.islower`, `s.isdigit`, `s.isalpha`, `s.isalnum`, `s.isspace`, `s.isascii`, `s.format`, `s.re_replace`, `s.re_match`, `s.re_find`, `s.re_split`, `s.wrap`, `s.truncate`, `s.prefix`, `s.suffix`, `s.indent`, `s.dedent`, `s.snake`, `s.kebab`, `s.camel`, `s.pascal`, `s.const`
