@@ -179,6 +179,22 @@ expect_eq "s.pascal snake_case"  "HelloWorld"         "$(echo 'hello_world' | s.
 expect_eq "s.pascal XMLParser"   "XmlParser"          "$(echo 'XMLParser' | s.pascal)"
 expect_eq "s.const camelCase"    "HELLO_WORLD"        "$(echo 'helloWorld' | s.const)"
 
+# --- split with MAXSPLIT / rsplit ---
+expect_eq "s.split maxsplit"       $'k\nv=x'          "$(echo 'k=v=x' | s.split '=' 1)"
+expect_eq "s.split per-line"       $'a\nb\nc\nd'      "$(printf 'a=b\nc=d\n' | s.split '=')"
+expect_eq "s.rsplit maxsplit"      $'k=v\nx'          "$(echo 'k=v=x' | s.rsplit '=' 1)"
+expect_eq "s.rsplit no maxsplit"   $'a\nb\nc'         "$(echo 'a.b.c' | s.rsplit '.')"
+
+# --- Escaping ---
+expect_eq "s.quote plain"          "abc"               "$(echo 'abc' | s.quote)"
+expect_eq "s.quote spaces"         "'a b'"             "$(echo 'a b' | s.quote)"
+expect_eq "s.quote single quote"   "'it'\"'\"'s'"       "$(echo "it's" | s.quote)"
+expect_eq "s.urlencode"            "a%20b%2Fc%3Fd%3De"  "$(echo 'a b/c?d=e' | s.urlencode)"
+expect_eq "s.urldecode"            "a b/c?d=e+f"       "$(echo 'a%20b%2Fc%3Fd%3De+f' | s.urldecode)"
+expect_eq "s.urlencode roundtrip"  "x&y=1 2"           "$(echo 'x&y=1 2' | s.urlencode | s.urldecode)"
+expect_eq "s.strip_ansi colours"   "red bold plain"    "$(printf '\e[31mred\e[0m \e[1;4mbold\e[m plain\n' | s.strip_ansi)"
+expect_eq "s.strip_ansi cursor"    "ab"                "$(printf 'a\e[2Kb\n' | s.strip_ansi)"
+
 # --- Completion menu covers every function ---
 expect_eq "completion lists every s.* function" \
     "$(print -l ${(ok)functions[(I)s.*]})" \

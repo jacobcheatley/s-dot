@@ -59,7 +59,8 @@ _s_funcs_dispatcher() {
         's.expandtabs:replace tabs with N spaces (column-aware)'
     )
     decompose=(
-        's.split:split on SEP (default whitespace) -> one line each'
+        's.split:split on SEP [MAXSPLIT] (default whitespace) -> one line each'
+        's.rsplit:split on SEP from the right, up to MAXSPLIT times'
         's.re_split:re.split on PATTERN -> one line per piece'
         's.partition:split into head/sep/tail (3 lines)'
         's.rpartition:partition on last occurrence'
@@ -80,6 +81,10 @@ _s_funcs_dispatcher() {
         's.indent:indent each line by N copies of CHAR'
         's.dedent:strip common leading whitespace'
         's.format:apply Python TEMPLATE.format(line) per line'
+        's.quote:shell-quote each line (shlex.quote)'
+        's.urlencode:percent-encode each line'
+        's.urldecode:decode %XX escapes'
+        's.strip_ansi:remove ANSI colour and cursor codes'
     )
     line_ops=(
         's.sort:sort lines (byte-wise, LC_ALL=C)'

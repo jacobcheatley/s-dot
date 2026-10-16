@@ -293,24 +293,37 @@ for line in sys.stdin:
     fi
 }
 
+# Shared body for s.split / s.rsplit with an explicit SEP: METHOD WHOLE SEP [MAXSPLIT].
+_s_split_on () {
+    local method="$1" whole="$2" sep="$3" maxsplit="${4:--1}"
+    _s_py 'import sys
+method, sep, n, whole = sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4] == "1"
+chunks = [sys.stdin.read().removesuffix("\n")] if whole else (line.rstrip("\n") for line in sys.stdin)
+for chunk in chunks:
+    print("\n".join(getattr(chunk, method)(sep, n)))
+' -- "$method" "$sep" "$maxsplit" "$whole"
+}
+
 s.split () {
     local whole=0
     [[ "$1" == "-w" || "$1" == "--whole" ]] && { whole=1; shift; }
-    if [[ -t 0 ]]; then echo "Usage: ... | s.split [SEP]" >&2; return 2; fi
+    if [[ -t 0 ]]; then echo "Usage: ... | s.split [SEP [MAXSPLIT]]" >&2; return 2; fi
     local sep="$1"
     if [[ -z "$sep" ]] && [[ $# -eq 0 ]]; then
         tr -s '[:space:]' '\n' | sed '/^$/d'
     elif [[ -z "$sep" ]]; then
         fold -w1
     else
-        _s_py 'import sys
-sep = sys.argv[1]
-data = sys.stdin.read()
-if data.endswith("\n"):
-    data = data[:-1]
-print("\n".join(data.split(sep)))
-' -- "$sep"
+        _s_split_on split "$whole" "$@"
     fi
+}
+
+s.rsplit () {
+    local whole=0
+    [[ "$1" == "-w" || "$1" == "--whole" ]] && { whole=1; shift; }
+    if [[ -t 0 ]]; then echo "Usage: ... | s.rsplit SEP [MAXSPLIT]" >&2; return 2; fi
+    if [[ -z "$1" ]]; then echo "s.rsplit: needs SEP arg" >&2; return 2; fi
+    _s_split_on rsplit "$whole" "$@"
 }
 
 s.join () {
@@ -1049,6 +1062,52 @@ s.dedent () {
     _s_py 'import sys, textwrap
 sys.stdout.write(textwrap.dedent(sys.stdin.read()))
 '
+}
+
+# --- Escaping ---
+
+s.quote () {
+    local whole=0
+    [[ "$1" == "-w" || "$1" == "--whole" ]] && { whole=1; shift; }
+    if [[ -t 0 ]]; then echo "Usage: ... | s.quote" >&2; return 2; fi
+    if (( whole )); then
+        _s_py 'import sys, shlex; print(shlex.quote(sys.stdin.read().removesuffix("\n")))'
+    else
+        _s_py 'import sys, shlex
+for line in sys.stdin:
+    print(shlex.quote(line.rstrip("\n")))
+'
+    fi
+}
+
+s.urlencode () {
+    local whole=0
+    [[ "$1" == "-w" || "$1" == "--whole" ]] && { whole=1; shift; }
+    if [[ -t 0 ]]; then echo "Usage: ... | s.urlencode" >&2; return 2; fi
+    if (( whole )); then
+        _s_py 'import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read().removesuffix("\n"), safe=""))'
+    else
+        _s_py 'import sys, urllib.parse
+for line in sys.stdin:
+    print(urllib.parse.quote(line.rstrip("\n"), safe=""))
+'
+    fi
+}
+
+# Plain unquote: `+` stays literal, as in URL paths. Form-encoded `+` for space is not decoded.
+s.urldecode () {
+    local whole=0
+    [[ "$1" == "-w" || "$1" == "--whole" ]] && { whole=1; shift; }
+    if [[ -t 0 ]]; then echo "Usage: ... | s.urldecode" >&2; return 2; fi
+    _s_py 'import sys, urllib.parse; sys.stdout.write(urllib.parse.unquote(sys.stdin.read()))'
+}
+
+# Removes ANSI CSI sequences (colours, cursor movement): ESC [ params intermediates final.
+s.strip_ansi () {
+    local whole=0
+    [[ "$1" == "-w" || "$1" == "--whole" ]] && { whole=1; shift; }
+    if [[ -t 0 ]]; then echo "Usage: ... | s.strip_ansi" >&2; return 2; fi
+    LC_ALL=C sed -E $'s/\x1b\\[[0-?]*[ -/]*[@-~]//g'
 }
 
 # --- Case style converters ---
