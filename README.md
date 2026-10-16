@@ -1,4 +1,4 @@
-# s-dot
+# s.*
 
 Python `str`-style text manipulation for zsh pipelines. Every function is prefixed `s.` so it never collides with coreutils or zsh builtins.
 
